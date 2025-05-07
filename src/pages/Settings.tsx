@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+
+// URL do backend
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8080/api';
 
 const SettingsPage = () => {
   // Mock initial settings
@@ -22,16 +24,50 @@ const SettingsPage = () => {
     apiKey: 'api_key_12345',
   });
 
-  const handleChatwootSubmit = (e: React.FormEvent) => {
+  const handleChatwootSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would save to your backend
-    toast.success("Chatwoot settings saved successfully");
+    try {
+      const response = await fetch(`${API_URL}/settings/chatwoot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(chatwootSettings),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao salvar configurações');
+      }
+      
+      toast.success("Configurações do Chatwoot salvas com sucesso");
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error("Falha ao salvar configurações do Chatwoot");
+    }
   };
 
-  const handleWebhookSubmit = (e: React.FormEvent) => {
+  const handleWebhookSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would save to your backend
-    toast.success("Webhook settings saved successfully");
+    try {
+      const response = await fetch(`${API_URL}/settings/webhook`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookSettings),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao salvar configurações');
+      }
+      
+      toast.success("Configurações de webhook salvas com sucesso");
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error("Falha ao salvar configurações de webhook");
+    }
   };
 
   return (

@@ -7,39 +7,73 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader, QrCode } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { toast } from 'sonner';
+
+// URL do backend
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8080/api';
 
 const ConnectPage = () => {
   const [sessionName, setSessionName] = useState('');
   const [loading, setLoading] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
 
-  const handleGenerateQR = () => {
+  const handleGenerateQR = async () => {
     if (!sessionName.trim()) return;
     
     setLoading(true);
     
-    // This would normally be an API call to your backend
-    setTimeout(() => {
-      // Generate a random string to simulate a WhatsApp connection URL
-      // In a real implementation, this would come from your backend
-      const randomValue = Math.random().toString(36).substring(2, 15);
-      const mockWhatsappUrl = `whatsapp://connection/${randomValue}`;
-      setQrCode(mockWhatsappUrl);
+    try {
+      const response = await fetch(`${API_URL}/sessions/qr`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionName }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao gerar QR code');
+      }
+      
+      setQrCode(data.qrCode);
+      toast.success("QR Code gerado com sucesso!");
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error("Falha ao gerar QR code. Tente novamente.");
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
-  const handleRefreshQR = () => {
+  const handleRefreshQR = async () => {
     if (qrCode) {
       setLoading(true);
       
-      // This would be another API call to refresh the QR code
-      setTimeout(() => {
-        const randomValue = Math.random().toString(36).substring(2, 15);
-        const mockWhatsappUrl = `whatsapp://connection/${randomValue}`;
-        setQrCode(mockWhatsappUrl);
+      try {
+        const response = await fetch(`${API_URL}/sessions/qr`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionName }),
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Erro ao atualizar QR code');
+        }
+        
+        setQrCode(data.qrCode);
+        toast.success("QR Code atualizado com sucesso!");
+      } catch (error) {
+        console.error('Erro:', error);
+        toast.error("Falha ao atualizar QR code. Tente novamente.");
+      } finally {
         setLoading(false);
-      }, 2000);
+      }
     }
   };
 
