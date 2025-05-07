@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader } from 'lucide-react';
+import { Loader, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const ConnectPage = () => {
   const [sessionName, setSessionName] = useState('');
@@ -19,10 +20,27 @@ const ConnectPage = () => {
     
     // This would normally be an API call to your backend
     setTimeout(() => {
-      // Mock QR code data URL for demo purposes
-      setQrCode("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+      // Generate a random string to simulate a WhatsApp connection URL
+      // In a real implementation, this would come from your backend
+      const randomValue = Math.random().toString(36).substring(2, 15);
+      const mockWhatsappUrl = `whatsapp://connection/${randomValue}`;
+      setQrCode(mockWhatsappUrl);
       setLoading(false);
     }, 2000);
+  };
+
+  const handleRefreshQR = () => {
+    if (qrCode) {
+      setLoading(true);
+      
+      // This would be another API call to refresh the QR code
+      setTimeout(() => {
+        const randomValue = Math.random().toString(36).substring(2, 15);
+        const mockWhatsappUrl = `whatsapp://connection/${randomValue}`;
+        setQrCode(mockWhatsappUrl);
+        setLoading(false);
+      }, 2000);
+    }
   };
 
   return (
@@ -65,12 +83,28 @@ const ConnectPage = () => {
               {qrCode && (
                 <div className="pt-6 space-y-4">
                   <div className="border-t border-border pt-4">
-                    <h3 className="text-lg font-medium mb-4">Scan this QR code with your WhatsApp</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium">Scan this QR code with your WhatsApp</h3>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleRefreshQR}
+                        disabled={loading}
+                      >
+                        {loading ? <Loader className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4 mr-2" />}
+                        {loading ? "Refreshing..." : "Refresh QR"}
+                      </Button>
+                    </div>
                     
-                    <div className="bg-white p-4 rounded-md w-64 h-64 mx-auto flex items-center justify-center">
-                      <div className="text-xs text-gray-500">QR code placeholder</div>
-                      {/* In a real app, you would display the actual QR code image here */}
-                      {/* <img src={qrCode} alt="WhatsApp QR Code" className="w-full h-full" /> */}
+                    <div className="bg-white p-4 rounded-md mx-auto flex items-center justify-center">
+                      <QRCodeSVG 
+                        value={qrCode} 
+                        size={256}
+                        bgColor="#FFFFFF"
+                        fgColor="#000000"
+                        level="H"
+                        includeMargin={true}
+                      />
                     </div>
                     
                     <p className="text-sm text-metabridge-muted mt-4">
